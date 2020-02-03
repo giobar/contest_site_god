@@ -9,7 +9,21 @@ const QuizResources = {
 
     getAllQuizs: async function getAllQuiz() {
         const allTodos = await API.graphql(graphqlOperation(queries.listQuizs));
+        
         return allTodos;
+    },
+
+    getUserQuizAndAdministrator: async function getUserQuizAndAdministrator(user){
+        var adminQuiz = await API.graphql(graphqlOperation(queries.listQuizs,
+            {
+                filter: {
+                    or:[
+                        {creator: { eq: "admin"}},
+                        {creator: { eq: user }}
+                    ]
+                }
+            }));
+        return adminQuiz
     },
 
     getQuiz: async function getQuiz(id) {

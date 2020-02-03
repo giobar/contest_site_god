@@ -28,9 +28,11 @@ export class QuizList extends React.Component {
     }
 
     componentDidMount() {
-        QuizResources.getAllQuizs()
-            .then(result => { console.log(result); this.setState({ quizList: result.data.listQuizs.items }); })
         AuthenticationManager.isLoggedIn(this.getQuizRes)
+        //QuizResources.getAllQuizs()
+        /*QuizResources.getUserQuizAndAdministrator()
+            .then(result => { console.log(result); this.setState({ quizList: result.data.listQuizs.items }); })
+*/
         //QuizResources.getUsertQuizResult(userState).then(data=>console.log(data))
     }
 
@@ -44,15 +46,19 @@ export class QuizList extends React.Component {
                 QuizResources.getUserQuizResult(userData).then(data => {
                     this.setState({ quizResult: data.data.listQuizResults.items, showLoader: false });
                 })
+                QuizResources.getUserQuizAndAdministrator(userState.userLogged.username)
+                    .then(result => { console.log(result); this.setState({ quizList: result.data.listQuizs.items }); })
             }
         } else {
             this.setState({ showLoader: false })
+            QuizResources.getUserQuizAndAdministrator("admin")
+                    .then(result => { console.log(result); this.setState({ quizList: result.data.listQuizs.items }); })
         }
     }
 
     checkIfFoundResult = (id) => {
         try {
-            if (this.state.quizResult!=null) {
+            if (this.state.quizResult != null) {
                 var found = this.state.quizResult.find(function (item, i) {
                     if (item.quizId == id) {
                         return true;

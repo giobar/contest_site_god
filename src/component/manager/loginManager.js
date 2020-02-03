@@ -34,8 +34,6 @@ export class LoginManager extends React.Component {
   }
 
   
-
-
   render() {
     return <LoginPage handleLogin={this.handleLogin} />;
   }

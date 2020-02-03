@@ -13,6 +13,7 @@ import { I18n, Auth } from 'aws-amplify';
 import { LoginNav } from './LoginNav';
 import AuthenticationManager from './AuthenticationManager';
 import "./Login.css"
+import MyLoader from '../loading/Loader';
 
 
 
@@ -21,6 +22,10 @@ class LoginPage extends React.Component {
     super(props);
     window.profilecomponent = this
     this.state = {
+      confirmation: false,
+      confirmationCode:'',
+      confirmationCodeError:'',
+      load: false,
       showModal: false,
       isLoggedIn: false,
       username: '',
@@ -38,7 +43,7 @@ class LoginPage extends React.Component {
   }
 
   getUserDetails = () => {
-    if(this.state.isLoggedIn){
+    if (this.state.isLoggedIn) {
       return this.state
     }
     return null
@@ -96,10 +101,30 @@ class LoginPage extends React.Component {
     }
   }
 
-  loginWithoutProvider = (message) => {
-    this.setState({ errorMessage: message })
-    if (message == 'ok') {
-      window.location.reload()
+  loginWithoutProvider = (message, method) => {
+    console.log(message, method)
+    if(message.includes("Utente non confermato")){
+      this.setState({ confirmation:true })
+    }
+    if(message!="ok"|| message!=""){
+      this.setState({ errorMessage: message, load: false })
+    }
+    this.setState({load: false })
+    if (method === "signin") {
+      if (message == 'ok') {
+        window.location.reload()
+      }
+    } else if (method === "signup") {
+      if (message == 'ok') {
+        this.setState({confirmation:true})
+        window.errorcomponent.showMessage("Utente creato...Controlla la tua mail per confermare la registrazione.", "success")
+      }
+    }else if(method === "confirmation"){
+      if(message == 'ok'){
+        this.setState({stateLogin:true,confirmation:false})
+        window.errorcomponent.showMessage("Utente confermato.", "success")
+        console.log(this.state)
+      }
     }
   }
 
@@ -107,8 +132,9 @@ class LoginPage extends React.Component {
     var usernameError = "";
     var emailError = "";
     var passwordError = "";
+    var confirmationCodeError = "";
     var noError = true;
-    this.setState({ usernameError: "", passwordError: "", emailError: "" })
+    this.setState({ usernameError: "", passwordError: "", emailError: "",confirmationCodeError:"" })
     if (this.state.username.length <= 0) {
       usernameError = "Campo Obbligatorio"
       noError = false
@@ -121,12 +147,24 @@ class LoginPage extends React.Component {
       passwordError = "Campo Obbligatorio"
       noError = false
     }
+    if(this.state.confirmation && this.state.confirmationCode<=0){
+      confirmationCodeError = "Campo obbligatorio"
+      noError = false
+    }
     if (!noError) {
-      this.setState({ usernameError: usernameError, passwordError: passwordError, emailError: emailError })
+      this.setState({ usernameError: usernameError, passwordError: passwordError, emailError: emailError, confirmationCodeError:confirmationCodeError})
+      return
+    } else if(this.state.confirmation){
+      this.setState({ load: true })
+      AuthenticationManager.confirmSignUp(this.state.username,this.state.confirmationCode).then((message) => this.loginWithoutProvider(message, "confirmation"))
     } else if (this.state.stateLogin) {
-      AuthenticationManager.signIn(this.state.username, this.state.password).then((message) => this.loginWithoutProvider(message))
+      this.setState({ load: true })
+      AuthenticationManager.signIn(this.state.username, this.state.password).then((message) => this.loginWithoutProvider(message, "signin"))
+      return
     } else if (!this.state.stateLogin) {
-      AuthenticationManager.signUp(this.state.username, this.state.password, this.state.email).then((message) => this.setState({ errorMessage: message }))
+      this.setState({ load: true })
+      AuthenticationManager.signUp(this.state.username, this.state.password, this.state.email).then((message) => this.loginWithoutProvider(message, "signup"))
+      return
     }
   }
 
@@ -143,7 +181,12 @@ class LoginPage extends React.Component {
     this.setState({ email: email })
   }
 
+  saveConfirmationCode = (confirmationCode) =>{
+    this.setState({confirmationCode:confirmationCode})
+  }
+
   onStateChange = (change) => {
+    this.setState({ load: true })
     window.location.reload()
   }
 
@@ -155,62 +198,94 @@ class LoginPage extends React.Component {
             <b>{this.state.stateLogin ? "Accedi..." : "Crea un nuovo utente..."}</b>
           </Typography>
           <Card.Body>
-            <Form>
-              <Form.Group controlId="formBasicEmail">
-                <TextField
-                  fullWidth
-                  required
-                  onChange={(e) => this.saveUsername(e.target.value)}
-                  error={this.state.usernameError != ""}
-                  type="email"
-                  id="outlined-error-helper-text"
-                  label={this.state.stateLogin ? "Nome Utente/Email" : "Nome Utente"}
-                  helperText={this.state.usernameError}
-                  variant="outlined"
-                />
-              </Form.Group>
-              {!this.state.stateLogin &&
-                <Form.Group controlId="formBasicEmail">
+            {!this.state.confirmation &&
+              <Form>
+                <Form.Group controlId="formBasicUsername">
                   <TextField
                     fullWidth
                     required
-                    onChange={(e) => this.saveEmail(e.target.value)}
-                    error={this.state.emailError != ""}
-                    id="outlined-error-helper-text"
-                    label="Email"
+                    defaultValue = {this.state.username}
+                    onChange={(e) => this.saveUsername(e.target.value)}
+                    error={this.state.usernameError != ""}
                     type="email"
-                    helperText={this.state.emailError}
+                    id="outlined-error-helper-text"
+                    label={this.state.stateLogin ? "Nome Utente/Email" : "Nome Utente"}
+                    helperText={this.state.usernameError}
                     variant="outlined"
-
                   />
                 </Form.Group>
-              }
-              <Form.Group controlId="formBasicPassword">
+                {!this.state.stateLogin &&
+                  <Form.Group controlId="formBasicEmail">
+                    <TextField
+                      fullWidth
+                      required
+                      onChange={(e) => this.saveEmail(e.target.value)}
+                      error={this.state.emailError != ""}
+                      id="outlined-error-helper-text"
+                      label="Email"
+                      type="email"
+                      helperText={this.state.emailError}
+                      variant="outlined"
 
+                    />
+                  </Form.Group>
+                }
+                <Form.Group controlId="formBasicPassword">
+
+                  <TextField
+                    fullWidth
+                    required
+                    defaultValue = {this.state.password}
+                    onChange={(e) => this.savePassword(e.target.value)}
+                    error={this.state.passwordError != ""}
+                    id="outlined-error-helper-text"
+                    label="Password"
+                    type="password"
+                    helperText={this.state.passwordError}
+                    variant="outlined"
+                  />
+                </Form.Group>
+                <Button variant="outline-success" onClick={() => this.checkTextFields()}>{this.state.stateLogin ? "Accedi" : "Registrati"}</Button>
+                <br />
+                <br />
+                {(this.state.errorMessage != "ok" && this.state.errorMessage!="") &&
+                  <Alert key="alert" variant="danger">
+                    {this.state.errorMessage}
+                  </Alert>
+                }
+              </Form>
+            }
+            {this.state.confirmation &&
+              < Form >
+              <Form.Group controlId="formBasicUsername">
                 <TextField
                   fullWidth
                   required
-                  onChange={(e) => this.savePassword(e.target.value)}
-                  error={this.state.passwordError != ""}
+                  onChange={(e) => this.saveConfirmationCode(e.target.value)}
+                  error={this.state.confirmationCodeError != ""}
+                  type="number"
                   id="outlined-error-helper-text"
-                  label="Password"
-                  type="password"
-                  helperText={this.state.passwordError}
+                  label="Codice di verifica"
+                  helperText={this.state.confirmationCodeError}
                   variant="outlined"
                 />
               </Form.Group>
-              <Button variant="outline-success" onClick={() => this.checkTextFields()}>{this.state.stateLogin ? "Accedi" : "Registrati"}</Button>
+              <Form.Group controlId="formBasicUsername">
+                <h5>Non hai ricevuto il codice? </h5><Button variant="link" color="primary"onClick={()=>AuthenticationManager.resendCodeSignUp(this.state.username)}>Rinviamelo</Button>
+              </Form.Group>
+              <Button variant="outline-success" onClick={() => this.checkTextFields()}>Conferma</Button>
               <br />
               <br />
-              {this.state.errorMessage != "ok" &&
-                <Alert key="alert" variant="danger">
-                  {this.state.errorMessage}
-                </Alert>
-              }
-            </Form>
+            {this.state.errorMessage != "ok" &&  this.state.errorMessage != "" &&
+              <Alert key="alert" variant="danger">
+                {this.state.errorMessage}
+              </Alert>
+            }
+          </Form>
+          }
           </Card.Body>
         </CardContent>
-      </Card>)
+      </Card >)
 
 
 
@@ -255,6 +330,10 @@ class LoginPage extends React.Component {
           <div >
             <p onClick={this.handleShow}>Login</p>
             <Modal show={this.state.show} onHide={() => this.handleClose()}>
+
+              {this.state.load &&
+                <MyLoader></MyLoader>
+              }
               <LoginNav onChangeState={this.changeState}></LoginNav>
 
               {formComponent}

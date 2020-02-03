@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import NavBar from './component/navbar/NavBar';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -11,7 +10,6 @@ import { AtlanteHome } from './component/atlante/AtlanteHome';
 import { HomePageComponent } from './component/HomeComponent/HomePageComponent';
 import { Footer } from './component/Footer/Footer';
 import { QuizContest } from './component/quiz/Quiz';
-import QuizThanks from './component/quiz/Thanks';
 import { QuizList } from './component/quiz/QuizList';
 import Amplify from 'aws-amplify';
 import awsconfig from './aws-exports';
@@ -22,14 +20,14 @@ Amplify.configure(awsconfig);
 
 function App() {
 
-
+  
   return (
+    
     <BrowserRouter>
       <NavBar/>
       <Switch>
         <Route exact path={"/"} component={QuizList} />
         <Route exact path={"/quiz"} component={QuizList} />
-        <Route exact path={"/quiz/thanks"} component={QuizThanks} />
         <Route exact path={"/quiz/creator"} component={QuizCreator} />
         <Route exact path={"/quiz/:quizId"} component={QuizContest} />
         <Route exact path={"/profile"} component={ProfilePage} />

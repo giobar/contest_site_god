@@ -19,7 +19,7 @@ function createQuestionJson(question) {
         }
     })
     var imageUrl = "";
-    if (type == "phototype1") {
+    if (type === "phototype1") {
         imageUrl = currentQuestionData.imageType1
     }
 

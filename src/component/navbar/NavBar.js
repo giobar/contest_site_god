@@ -2,7 +2,7 @@ import React from 'react';
 import image from '../../asset/logo.jpg'
 import './NavBar.css';
 import { LoginManager } from '../manager/loginManager';
-import { Nav, Navbar, Button, Alert } from 'react-bootstrap';
+import { Nav, Navbar, Button, Alert, Toast } from 'react-bootstrap';
 import { Dialog, DialogContent } from '@material-ui/core';
 
 
@@ -12,12 +12,13 @@ class NavBar extends React.Component {
         window.errorcomponent = this
         this.state = {
             scrolling: false,
-            alert: { showMessageAlert: false, textMessageAlert: "", typeAlert: "danger",onClick:"" }
+            alert: { showMessageAlert: false, textMessageAlert: "", typeAlert: "danger", onClick: "" }
         };
         this.handleScroll = this.handleScroll.bind(this);
     }
 
     componentDidMount() {
+        
         window.addEventListener('scroll', this.handleScroll);
     }
 
@@ -33,19 +34,19 @@ class NavBar extends React.Component {
         }
     }
 
-    showMessage = (text, typeMessage,typeError) => {
+    showMessage = (text, typeMessage, typeError) => {
         this.setState({ alert: { showMessageAlert: true, textMessageAlert: text, typeAlert: typeMessage, onClick: typeError } })
     }
 
-    executeMethodAlert = ()=>{
+    executeMethodAlert = () => {
         console.log("Execute method alert")
         console.log(window.profilecomponent)
-        if(this.state.alert.onClick=="login"){
+        if (this.state.alert.onClick == "login") {
             this.setState({ alert: { showMessageAlert: false } })
             window.profilecomponent.handleShow()
-        }else{
+        } else if(this.state.alert.onClick!=undefined){
             this.state.alert.onClick()
-        }    
+        }
     }
 
     render() {
@@ -53,9 +54,9 @@ class NavBar extends React.Component {
             <Navbar collapseOnSelect className="navbar" expand="lg" fixed="top" style={{ position: this.state.scrolling ? 'fixed' : 'relative', top: 0, width: '100%', zIndex: 1 }} className="flex-column">
                 {this.state.alert.showMessageAlert &&
                     <Dialog open={true}
-                        style={{backgroundColor:'transparent'}}
-                        onClick={()=> this.executeMethodAlert()}
-                        >
+                        style={{ backgroundColor: 'transparent' }}
+                        onClick={() => this.executeMethodAlert()}
+                    >
                         <DialogContent>
                             <Alert dismissible variant={this.state.alert.typeAlert} isOpen={true} onClose={() => this.setState({ alert: { showMessageAlert: false } })}>
                                 {this.state.alert.textMessageAlert}

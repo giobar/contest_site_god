@@ -3,7 +3,6 @@ import { Button, FormGroup, Form, Accordion, Card, Navbar, Badge } from 'react-b
 import { Question } from './Question';
 import { PrepareJsonForSave } from './PrepareJson';
 import { PhotoPicker } from 'aws-amplify-react';
-import { useHistory } from 'react-router-dom';
 import { AlertModal } from '../../alert/AlertModal';
 import MyLoader from '../../loading/Loader';
 import "react-datepicker/dist/react-datepicker.css";
@@ -79,11 +78,10 @@ export class CreatorForm extends React.Component {
             window.errorcomponent.showMessage("Non sono presenti domande...Aggiungine qualcuna!!", "warning")
             return false
         }
-        if(this.checkQuestionFieldErrors()){
+        if (this.checkQuestionFieldErrors()) {
             window.errorcomponent.showMessage("Non tutti i campi delle domande sono compilati!!", "warning")
             return false
         }
-
         if (!itsOK) {
             window.errorcomponent.showMessage("Compila tutti i campi per proseguire", "danger")
         }
@@ -91,10 +89,10 @@ export class CreatorForm extends React.Component {
         return itsOK
     }
 
-    checkQuestionFieldErrors = ()=>{
+    checkQuestionFieldErrors = () => {
         var questionFieldsError = true;
-        this.state.questions.map(question =>{
-            if(question.current.checkFields()){
+        this.state.questions.map(question => {
+            if (question.current.checkFields()) {
                 questionFieldsError = false
             }
         })
@@ -116,7 +114,11 @@ export class CreatorForm extends React.Component {
     saveQuestion = (user) => {
         if (user != "Error") {
             console.log(user)
-            PrepareJsonForSave(this.state, user.name);
+            if (user.name == undefined) {
+                PrepareJsonForSave(this.state, user.username);
+            } else {
+                PrepareJsonForSave(this.state, user.name);
+            }
             this.setState({ showAlert: false, showLoader: true })
             setTimeout(function () {
                 this.props.backButton()
@@ -160,7 +162,7 @@ export class CreatorForm extends React.Component {
                                 fullWidth
                                 required
                                 multiline
-                                
+
                                 onChange={(e) => { this.setState({ smallDescription: e.target.value }) }}
                                 error={this.state.smallDescriptionError != ""}
                                 type="text"
@@ -175,7 +177,7 @@ export class CreatorForm extends React.Component {
                                 fullWidth
                                 required
                                 multiline
-                                
+
                                 onChange={(e) => { this.setState({ description: e.target.value }) }}
                                 error={this.state.descriptionError != ""}
                                 type="text"
