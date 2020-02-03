@@ -1,38 +1,50 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background-color: transparent;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: black;
 }
 
+.Middler{
+  width:800px;
+   margin:0 auto;
+}
 .App-link {
-  color: #61dafb;
+  color: #09d3ac;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.Footer {
+  background-color: #282c34;
+  position:absolute;
+  left:0;
+  bottom:0;
+  right:0;
+}
+
+
+.MuiTypography-h1{
+  font-size: 1.912em;
+  line-height: calc(18px + 1.8vw); /* Responsive Vertical Rhythm */
+}
+.MuiTypography-h2 {
+  font-size: 1.616em;
+  line-height: calc(18px + 1vw); /* Responsive Vertical Rhythm */
+}
+h3 {
+  font-size: 1.471em;
+  line-height: calc(18px + .7vw); /* Responsive Vertical Rhythm */
+}
+h4 { font-size: 1.3em; }
+h5 { font-size: 1.243em; }
+.MuiTypography-h6 { 
+  line-height: calc(18px + .2vw); /* Responsive Vertical Rhythm */
+}
+.MuiTypography-body2 { 
+  line-height: calc(18px + .2vw); /* Responsive Vertical Rhythm */
 }
